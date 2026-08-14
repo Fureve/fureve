@@ -3,11 +3,18 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
+import VariantOptionsEditor, { VariantOption } from "../../../components/VariantOptionsEditor";
 
 type ItemImage = {
   id: string;
   image_url: string;
   sort_order: number;
+};
+
+type Collection = {
+  id: string;
+  name: string;
+  type: "products" | "customizable";
 };
 
 export default function EditCustomizableItem() {
@@ -23,22 +30,28 @@ export default function EditCustomizableItem() {
   const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
   const [newPreviews, setNewPreviews] = useState<string[]>([]);
   const [hasSizes, setHasSizes] = useState(false);
-  const [sizesInput, setSizesInput] = useState("");
+  const [sizeOptions, setSizeOptions] = useState<VariantOption[]>([]);
   const [hasLengths, setHasLengths] = useState(false);
-  const [lengthsInput, setLengthsInput] = useState("");
+  const [lengthOptions, setLengthOptions] = useState<VariantOption[]>([]);
   const [hasColors, setHasColors] = useState(false);
-  const [colorsInput, setColorsInput] = useState("");
+  const [colorOptions, setColorOptions] = useState<VariantOption[]>([]);
+  const [collectionId, setCollectionId] = useState("");
+  const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-
   useEffect(() => {
-    async function loadItem() {
-      const res = await fetch(`/api/admin/customizable-items/${id}`);
-      const data = await res.json();
+    async function loadData() {
+      const [itemRes, collectionsRes] = await Promise.all([
+        fetch(`/api/admin/customizable-items/${id}`),
+        fetch("/api/admin/collections"),
+      ]);
 
-            if (data.item) {
+      const data = await itemRes.json();
+      const collectionsData = await collectionsRes.json();
+
+      if (data.item) {
         const item = data.item;
         setName(item.name);
         setDescription(item.description || "");
@@ -48,23 +61,31 @@ export default function EditCustomizableItem() {
             (a: ItemImage, b: ItemImage) => a.sort_order - b.sort_order
           )
         );
-        if (item.sizes && item.sizes.length > 0) {
+        if (item.size_options && item.size_options.length > 0) {
           setHasSizes(true);
-          setSizesInput(item.sizes.join(", "));
+          setSizeOptions(item.size_options);
         }
-        if (item.lengths && item.lengths.length > 0) {
+        if (item.length_options && item.length_options.length > 0) {
           setHasLengths(true);
-          setLengthsInput(item.lengths.join(", "));
+          setLengthOptions(item.length_options);
         }
-        if (item.colors && item.colors.length > 0) {
+        if (item.color_options && item.color_options.length > 0) {
           setHasColors(true);
-          setColorsInput(item.colors.join(", "));
+          setColorOptions(item.color_options);
+        }
+        if (item.collection_id) {
+          setCollectionId(item.collection_id);
         }
       }
 
+      const customizableCollections = (collectionsData.collections || []).filter(
+        (c: Collection) => c.type === "customizable"
+      );
+      setCollections(customizableCollections);
+
       setLoading(false);
     }
-    loadItem();
+    loadData();
   }, [id]);
 
   function handleNewFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -110,7 +131,7 @@ export default function EditCustomizableItem() {
       new_image_urls = uploadData.urls;
     }
 
-        const res = await fetch(`/api/admin/customizable-items/${id}`, {
+    const res = await fetch(`/api/admin/customizable-items/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -119,18 +140,12 @@ export default function EditCustomizableItem() {
         starting_price: startingPrice ? parseFloat(startingPrice) : null,
         new_image_urls,
         removed_image_ids: removedImageIds,
-        sizes: hasSizes
-          ? sizesInput.split(",").map((s) => s.trim()).filter(Boolean)
-          : [],
-        lengths: hasLengths
-          ? lengthsInput.split(",").map((s) => s.trim()).filter(Boolean)
-          : [],
-        colors: hasColors
-          ? colorsInput.split(",").map((s) => s.trim()).filter(Boolean)
-          : [],
+        size_options: hasSizes ? sizeOptions.filter((o) => o.value.trim()) : [],
+        length_options: hasLengths ? lengthOptions.filter((o) => o.value.trim()) : [],
+        color_options: hasColors ? colorOptions.filter((o) => o.value.trim()) : [],
+        collection_id: collectionId || null,
       }),
     });
-
 
     setSaving(false);
 
@@ -192,7 +207,7 @@ export default function EditCustomizableItem() {
 
           <div>
             <label className="block font-sans text-xs tracking-widest text-charcoal/70 uppercase mb-2">
-               Price ($) — optional
+              Price (₦) — optional
             </label>
             <input
               type="number"
@@ -245,7 +260,7 @@ export default function EditCustomizableItem() {
               className="w-full font-sans text-sm text-charcoal"
             />
 
-                        {newPreviews.length > 0 && (
+            {newPreviews.length > 0 && (
               <div className="flex flex-wrap gap-3 mt-4">
                 {newPreviews.map((src, i) => (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -260,80 +275,40 @@ export default function EditCustomizableItem() {
             )}
           </div>
 
-          <div className="border border-charcoal/10 p-5 flex flex-col gap-5">
-            <p className="font-sans text-xs tracking-widest text-charcoal/70 uppercase">
-              Variant Options
-            </p>
-
-            <div>
-              <label className="flex items-center gap-2 mb-2">
-                <input
-                  type="checkbox"
-                  checked={hasSizes}
-                  onChange={(e) => setHasSizes(e.target.checked)}
-                />
-                <span className="font-sans text-sm text-charcoal">
-                  This item comes in different sizes
-                </span>
-              </label>
-              {hasSizes && (
-                <input
-                  type="text"
-                  placeholder="e.g. 6, 7, 8, 9 (comma separated)"
-                  value={sizesInput}
-                  onChange={(e) => setSizesInput(e.target.value)}
-                  className="w-full bg-transparent border border-charcoal/20 px-4 py-2 font-sans text-sm text-charcoal focus:outline-none focus:border-gold transition-colors"
-                />
-              )}
-            </div>
-
-            <div>
-              <label className="flex items-center gap-2 mb-2">
-                <input
-                  type="checkbox"
-                  checked={hasLengths}
-                  onChange={(e) => setHasLengths(e.target.checked)}
-                />
-                <span className="font-sans text-sm text-charcoal">
-                  This item comes in different lengths
-                </span>
-              </label>
-              {hasLengths && (
-                <input
-                  type="text"
-                  placeholder="e.g. 16in, 18in, 20in (comma separated)"
-                  value={lengthsInput}
-                  onChange={(e) => setLengthsInput(e.target.value)}
-                  className="w-full bg-transparent border border-charcoal/20 px-4 py-2 font-sans text-sm text-charcoal focus:outline-none focus:border-gold transition-colors"
-                />
-              )}
-            </div>
-
-            <div>
-              <label className="flex items-center gap-2 mb-2">
-                <input
-                  type="checkbox"
-                  checked={hasColors}
-                  onChange={(e) => setHasColors(e.target.checked)}
-                />
-                <span className="font-sans text-sm text-charcoal">
-                  This item comes in different colors
-                </span>
-              </label>
-              {hasColors && (
-                <input
-                  type="text"
-                  placeholder="e.g. Gold, Silver, Rose Gold (comma separated)"
-                  value={colorsInput}
-                  onChange={(e) => setColorsInput(e.target.value)}
-                  className="w-full bg-transparent border border-charcoal/20 px-4 py-2 font-sans text-sm text-charcoal focus:outline-none focus:border-gold transition-colors"
-                />
-              )}
-            </div>
+          <div>
+            <label className="block font-sans text-xs tracking-widest text-charcoal/70 uppercase mb-2">
+              Collection (optional)
+            </label>
+            <select
+              value={collectionId}
+              onChange={(e) => setCollectionId(e.target.value)}
+              className="w-full bg-transparent border border-charcoal/20 px-4 py-3 font-sans text-charcoal focus:outline-none focus:border-gold transition-colors"
+            >
+              <option value="">No collection</option>
+              {collections.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
           </div>
 
-          {error && <p className="font-sans text-sm text-red-600">{error}</p>}
+          <VariantOptionsEditor
+            hasSizes={hasSizes}
+            setHasSizes={setHasSizes}
+            sizeOptions={sizeOptions}
+            setSizeOptions={setSizeOptions}
+            hasLengths={hasLengths}
+            setHasLengths={setHasLengths}
+            lengthOptions={lengthOptions}
+            setLengthOptions={setLengthOptions}
+            hasColors={hasColors}
+            setHasColors={setHasColors}
+            colorOptions={colorOptions}
+            setColorOptions={setColorOptions}
+          />
 
+          {error && <p className="font-sans text-sm text-red-600">{error}</p>}
 
           <button
             type="submit"

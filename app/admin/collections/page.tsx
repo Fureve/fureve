@@ -7,6 +7,7 @@ type Collection = {
   id: string;
   name: string;
   description: string | null;
+  type: "products" | "customizable";
 };
 
 export default function AdminCollections() {
@@ -78,16 +79,24 @@ export default function AdminCollections() {
                 key={collection.id}
                 className="bg-cream border border-charcoal/10 p-5 flex items-center justify-between"
               >
-                <div>
-                  <h3 className="font-serif text-lg text-charcoal">
-                    {collection.name}
-                  </h3>
+                                <div>
+                  <div className="flex items-center gap-3 mb-1">
+                    <h3 className="font-serif text-lg text-charcoal">
+                      {collection.name}
+                    </h3>
+                    <span className="font-sans text-xs tracking-widest text-gold uppercase border border-gold px-2 py-0.5">
+                      {collection.type === "customizable"
+                        ? "Customizable"
+                        : "Products"}
+                    </span>
+                  </div>
                   {collection.description && (
-                    <p className="font-sans text-sm text-charcoal/70 mt-1">
+                    <p className="font-sans text-sm text-charcoal/70">
                       {collection.description}
                     </p>
                   )}
                 </div>
+
                 <div className="flex gap-3 shrink-0 ml-4">
                   <Link
                     href={`/admin/collections/${collection.id}`}

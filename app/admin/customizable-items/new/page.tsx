@@ -1,8 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import VariantOptionsEditor, { VariantOption } from "../../../components/VariantOptionsEditor";
+
+type Collection = {
+  id: string;
+  name: string;
+  type: "products" | "customizable";
+};
 
 export default function NewCustomizableItem() {
   const router = useRouter();
@@ -12,14 +19,27 @@ export default function NewCustomizableItem() {
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [hasSizes, setHasSizes] = useState(false);
-  const [sizesInput, setSizesInput] = useState("");
+  const [sizeOptions, setSizeOptions] = useState<VariantOption[]>([]);
   const [hasLengths, setHasLengths] = useState(false);
-  const [lengthsInput, setLengthsInput] = useState("");
+  const [lengthOptions, setLengthOptions] = useState<VariantOption[]>([]);
   const [hasColors, setHasColors] = useState(false);
-  const [colorsInput, setColorsInput] = useState("");
+  const [colorOptions, setColorOptions] = useState<VariantOption[]>([]);
+  const [collectionId, setCollectionId] = useState("");
+  const [collections, setCollections] = useState<Collection[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    async function loadCollections() {
+      const res = await fetch("/api/admin/collections");
+      const data = await res.json();
+      const customizableCollections = (data.collections || []).filter(
+        (c: Collection) => c.type === "customizable"
+      );
+      setCollections(customizableCollections);
+    }
+    loadCollections();
+  }, []);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files || []);
@@ -59,7 +79,7 @@ export default function NewCustomizableItem() {
       image_urls = uploadData.urls;
     }
 
-        const res = await fetch("/api/admin/customizable-items", {
+    const res = await fetch("/api/admin/customizable-items", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -67,18 +87,12 @@ export default function NewCustomizableItem() {
         description,
         starting_price: startingPrice ? parseFloat(startingPrice) : null,
         image_urls,
-        sizes: hasSizes
-          ? sizesInput.split(",").map((s) => s.trim()).filter(Boolean)
-          : [],
-        lengths: hasLengths
-          ? lengthsInput.split(",").map((s) => s.trim()).filter(Boolean)
-          : [],
-        colors: hasColors
-          ? colorsInput.split(",").map((s) => s.trim()).filter(Boolean)
-          : [],
+        size_options: hasSizes ? sizeOptions.filter((o) => o.value.trim()) : [],
+        length_options: hasLengths ? lengthOptions.filter((o) => o.value.trim()) : [],
+        color_options: hasColors ? colorOptions.filter((o) => o.value.trim()) : [],
+        collection_id: collectionId || null,
       }),
     });
-
 
     setSaving(false);
 
@@ -131,7 +145,7 @@ export default function NewCustomizableItem() {
 
           <div>
             <label className="block font-sans text-xs tracking-widest text-charcoal/70 uppercase mb-2">
-                Price (₦) — optional
+              Price (₦) — optional
             </label>
             <input
               type="number"
@@ -157,7 +171,7 @@ export default function NewCustomizableItem() {
               The first image selected becomes the cover photo.
             </p>
 
-                        {previews.length > 0 && (
+            {previews.length > 0 && (
               <div className="flex flex-wrap gap-3 mt-4">
                 {previews.map((src, i) => (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -172,80 +186,44 @@ export default function NewCustomizableItem() {
             )}
           </div>
 
-          <div className="border border-charcoal/10 p-5 flex flex-col gap-5">
-            <p className="font-sans text-xs tracking-widest text-charcoal/70 uppercase">
-              Variant Options
-            </p>
-
-            <div>
-              <label className="flex items-center gap-2 mb-2">
-                <input
-                  type="checkbox"
-                  checked={hasSizes}
-                  onChange={(e) => setHasSizes(e.target.checked)}
-                />
-                <span className="font-sans text-sm text-charcoal">
-                  This item comes in different sizes
-                </span>
-              </label>
-              {hasSizes && (
-                <input
-                  type="text"
-                  placeholder="e.g. 6, 7, 8, 9 (comma separated)"
-                  value={sizesInput}
-                  onChange={(e) => setSizesInput(e.target.value)}
-                  className="w-full bg-transparent border border-charcoal/20 px-4 py-2 font-sans text-sm text-charcoal focus:outline-none focus:border-gold transition-colors"
-                />
-              )}
-            </div>
-
-            <div>
-              <label className="flex items-center gap-2 mb-2">
-                <input
-                  type="checkbox"
-                  checked={hasLengths}
-                  onChange={(e) => setHasLengths(e.target.checked)}
-                />
-                <span className="font-sans text-sm text-charcoal">
-                  This item comes in different lengths
-                </span>
-              </label>
-              {hasLengths && (
-                <input
-                  type="text"
-                  placeholder="e.g. 16in, 18in, 20in (comma separated)"
-                  value={lengthsInput}
-                  onChange={(e) => setLengthsInput(e.target.value)}
-                  className="w-full bg-transparent border border-charcoal/20 px-4 py-2 font-sans text-sm text-charcoal focus:outline-none focus:border-gold transition-colors"
-                />
-              )}
-            </div>
-
-            <div>
-              <label className="flex items-center gap-2 mb-2">
-                <input
-                  type="checkbox"
-                  checked={hasColors}
-                  onChange={(e) => setHasColors(e.target.checked)}
-                />
-                <span className="font-sans text-sm text-charcoal">
-                  This item comes in different colors
-                </span>
-              </label>
-              {hasColors && (
-                <input
-                  type="text"
-                  placeholder="e.g. Gold, Silver, Rose Gold (comma separated)"
-                  value={colorsInput}
-                  onChange={(e) => setColorsInput(e.target.value)}
-                  className="w-full bg-transparent border border-charcoal/20 px-4 py-2 font-sans text-sm text-charcoal focus:outline-none focus:border-gold transition-colors"
-                />
-              )}
-            </div>
+          <div>
+            <label className="block font-sans text-xs tracking-widest text-charcoal/70 uppercase mb-2">
+              Collection (optional)
+            </label>
+            <select
+              value={collectionId}
+              onChange={(e) => setCollectionId(e.target.value)}
+              className="w-full bg-transparent border border-charcoal/20 px-4 py-3 font-sans text-charcoal focus:outline-none focus:border-gold transition-colors"
+            >
+              <option value="">No collection</option>
+              {collections.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            {collections.length === 0 && (
+              <p className="font-sans text-xs text-charcoal/50 mt-2">
+                No customizable-type collections yet. Create one under Manage
+                Collections first if you'd like to group items.
+              </p>
+            )}
           </div>
 
-          {error && <p className="font-sans text-sm text-red-600">{error}</p>}
-
+          <VariantOptionsEditor
+            hasSizes={hasSizes}
+            setHasSizes={setHasSizes}
+            sizeOptions={sizeOptions}
+            setSizeOptions={setSizeOptions}
+            hasLengths={hasLengths}
+            setHasLengths={setHasLengths}
+            lengthOptions={lengthOptions}
+            setLengthOptions={setLengthOptions}
+            hasColors={hasColors}
+            setHasColors={setHasColors}
+            colorOptions={colorOptions}
+            setColorOptions={setColorOptions}
+          />
 
           {error && <p className="font-sans text-sm text-red-600">{error}</p>}
 

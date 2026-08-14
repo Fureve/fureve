@@ -26,15 +26,16 @@ export async function PUT(
 ) {
   const { id } = await params;
   const body = await request.json();
-  const {
+    const {
     name,
     description,
     starting_price,
     new_image_urls,
     removed_image_ids,
-    sizes,
-    lengths,
-    colors,
+    size_options,
+    length_options,
+    color_options,
+    collection_id,
   } = body;
 
   const { data: item, error } = await supabaseAdmin
@@ -43,9 +44,10 @@ export async function PUT(
       name,
       description,
       starting_price: starting_price || null,
-      sizes: sizes && sizes.length > 0 ? sizes : null,
-      lengths: lengths && lengths.length > 0 ? lengths : null,
-      colors: colors && colors.length > 0 ? colors : null,
+      size_options: size_options && size_options.length > 0 ? size_options : null,
+      length_options: length_options && length_options.length > 0 ? length_options : null,
+      color_options: color_options && color_options.length > 0 ? color_options : null,
+      collection_id: collection_id || null,
     })
     .eq("id", id)
     .select()

@@ -12,13 +12,24 @@ type ProductImage = {
   sort_order: number;
 };
 
+type VariantOption = {
+  value: string;
+  priceAdjustment: number;
+};
+
 type Product = {
   id: string;
   name: string;
   category: string;
   price: number;
+  description: string | null;
   product_images: ProductImage[];
+  size_options: VariantOption[] | null;
+  length_options: VariantOption[] | null;
+  color_options: VariantOption[] | null;
 };
+
+
 
 export default function ProductPage() {
   const params = useParams();
@@ -28,17 +39,49 @@ export default function ProductPage() {
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [selectedSize, setSelectedSize] = useState<VariantOption | null>(null);
+  const [selectedLength, setSelectedLength] = useState<VariantOption | null>(null);
+  const [selectedColor, setSelectedColor] = useState<VariantOption | null>(null);
+  const [variantError, setVariantError] = useState("");
+
+  const adjustedPrice =
+    (product?.price || 0) +
+    (selectedSize?.priceAdjustment || 0) +
+    (selectedLength?.priceAdjustment || 0) +
+    (selectedColor?.priceAdjustment || 0);
+
+
   const { addItem } = useCart();
   const [added, setAdded] = useState(false);
 
-  function handleAddToCart() {
+     function handleAddToCart() {
+    setVariantError("");
+
+    if (product?.size_options && product.size_options.length > 0 && !selectedSize) {
+      setVariantError("Please select a size.");
+      return;
+    }
+    if (product?.length_options && product.length_options.length > 0 && !selectedLength) {
+      setVariantError("Please select a length.");
+      return;
+    }
+    if (product?.color_options && product.color_options.length > 0 && !selectedColor) {
+      setVariantError("Please select a color.");
+      return;
+    }
+
     if (!product) return;
+
+    const variantParts = [selectedSize, selectedLength, selectedColor]
+      .filter((v): v is VariantOption => v !== null)
+      .map((v) => v.value);
+    const variantText = variantParts.length > 0 ? ` [${variantParts.join(", ")}]` : "";
 
     addItem({
       productId: product.id,
       slug,
-      name: product.name,
-      price: product.price,
+      name: `${product.name}${variantText}`,
+      price: adjustedPrice,
       image_url: images[0]?.image_url || null,
       quantity,
     });
@@ -46,7 +89,6 @@ export default function ProductPage() {
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   }
-
 
   function decreaseQuantity() {
     setQuantity((q) => Math.max(1, q - 1));
@@ -166,9 +208,92 @@ export default function ProductPage() {
             <h1 className="font-serif text-3xl md:text-4xl text-charcoal mb-4">
               {product.name}
             </h1>
-            <p className="font-serif text-2xl text-charcoal mb-8">
-              ₦{product.price}
+             <p className="font-serif text-2xl text-charcoal mb-8">
+              ₦{adjustedPrice.toFixed(2)}
             </p>
+
+
+            {product.description && (
+              <p className="font-sans text-base text-charcoal/70 leading-relaxed mb-8">
+                {product.description}
+              </p>
+            )}
+
+                        {product.size_options && product.size_options.length > 0 && (
+              <div className="mb-6">
+                <p className="font-sans text-xs tracking-widest text-charcoal/70 uppercase mb-2">
+                  Size
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {product.size_options.map((opt, index) => (
+                    <button
+                      key={`${opt.value}-${index}`}
+                      onClick={() => setSelectedSize(opt)}
+                      className={`px-4 py-2 border text-sm font-sans transition-colors ${
+                        selectedSize?.value === opt.value
+                          ? "border-gold bg-gold text-charcoal"
+                          : "border-charcoal/20 text-charcoal hover:border-charcoal"
+                      }`}
+                    >
+                      {opt.value}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {product.length_options && product.length_options.length > 0 && (
+              <div className="mb-6">
+                <p className="font-sans text-xs tracking-widest text-charcoal/70 uppercase mb-2">
+                  Length
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {product.length_options.map((opt, index) => (
+                    <button
+                      key={`${opt.value}-${index}`}
+                      onClick={() => setSelectedLength(opt)}
+                      className={`px-4 py-2 border text-sm font-sans transition-colors ${
+                        selectedLength?.value === opt.value
+                          ? "border-gold bg-gold text-charcoal"
+                          : "border-charcoal/20 text-charcoal hover:border-charcoal"
+                      }`}
+                    >
+                      {opt.value}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {product.color_options && product.color_options.length > 0 && (
+              <div className="mb-6">
+                <p className="font-sans text-xs tracking-widest text-charcoal/70 uppercase mb-2">
+                  Color
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {product.color_options.map((opt, index) => (
+                    <button
+                      key={`${opt.value}-${index}`}
+                      onClick={() => setSelectedColor(opt)}
+                      className={`px-4 py-2 border text-sm font-sans transition-colors ${
+                        selectedColor?.value === opt.value
+                          ? "border-gold bg-gold text-charcoal"
+                          : "border-charcoal/20 text-charcoal hover:border-charcoal"
+                      }`}
+                    >
+                      {opt.value}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {variantError && (
+              <p className="font-sans text-sm text-red-600 mb-4">
+                {variantError}
+              </p>
+            )}
+
 
                        <div className="mb-8">
               <label className="block font-sans text-xs tracking-widest text-charcoal/70 uppercase mb-3">

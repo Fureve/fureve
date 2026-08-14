@@ -26,14 +26,36 @@ export async function PUT(
 ) {
   const { id } = await params;
   const body = await request.json();
-  const { name, category, price, collection_id, new_image_urls, removed_image_ids } = body;
+  const {
+    name,
+    category,
+    price,
+    collection_id,
+    new_image_urls,
+    removed_image_ids,
+    description,
+    size_options,
+    length_options,
+    color_options,
+  } = body;
 
   const { data: product, error } = await supabaseAdmin
     .from("products")
-    .update({ name, category, price, collection_id: collection_id || null })
+    .update({
+      name,
+      category,
+      price,
+      collection_id: collection_id || null,
+      description,
+      size_options: size_options && size_options.length > 0 ? size_options : null,
+      length_options: length_options && length_options.length > 0 ? length_options : null,
+      color_options: color_options && color_options.length > 0 ? color_options : null,
+    })
     .eq("id", id)
     .select()
     .single();
+
+
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

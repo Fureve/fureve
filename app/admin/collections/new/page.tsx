@@ -8,8 +8,10 @@ export default function NewCollection() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [type, setType] = useState<"products" | "customizable">("products");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -25,8 +27,9 @@ export default function NewCollection() {
     const res = await fetch("/api/admin/collections", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, description }),
+      body: JSON.stringify({ name, description, type }),
     });
+
 
     setSaving(false);
 
@@ -65,7 +68,7 @@ export default function NewCollection() {
             />
           </div>
 
-          <div>
+                    <div>
             <label className="block font-sans text-xs tracking-widest text-charcoal/70 uppercase mb-2">
               Description (optional)
             </label>
@@ -77,7 +80,42 @@ export default function NewCollection() {
             />
           </div>
 
+          <div>
+            <label className="block font-sans text-xs tracking-widest text-charcoal/70 uppercase mb-2">
+              Collection Type
+            </label>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setType("products")}
+                className={`flex-1 px-4 py-3 border text-sm font-sans transition-colors ${
+                  type === "products"
+                    ? "border-gold bg-gold text-charcoal"
+                    : "border-charcoal/20 text-charcoal hover:border-charcoal"
+                }`}
+              >
+                Products
+              </button>
+              <button
+                type="button"
+                onClick={() => setType("customizable")}
+                className={`flex-1 px-4 py-3 border text-sm font-sans transition-colors ${
+                  type === "customizable"
+                    ? "border-gold bg-gold text-charcoal"
+                    : "border-charcoal/20 text-charcoal hover:border-charcoal"
+                }`}
+              >
+                Customizable Items
+              </button>
+            </div>
+            <p className="font-sans text-xs text-charcoal/50 mt-2">
+              This determines whether regular products or customizable items
+              can be added to this collection.
+            </p>
+          </div>
+
           {error && <p className="font-sans text-sm text-red-600">{error}</p>}
+
 
           <button
             type="submit"

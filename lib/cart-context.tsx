@@ -62,12 +62,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [items, loaded]);
 
-    function addItem(newItem: NewCartItem) {
+      function addItem(newItem: NewCartItem) {
     setItems((prev) => {
       if (!newItem.isCustom) {
         const existing = prev.find(
-          (i) => !i.isCustom && i.productId === newItem.productId
+          (i) =>
+            !i.isCustom &&
+            i.productId === newItem.productId &&
+            i.name === newItem.name
         );
+
         if (existing) {
           return prev.map((i) =>
             i.cartItemId === existing.cartItemId

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "../components/Navbar";
 import { useCart } from "@/lib/cart-context";
+import { deliveryRates } from "@/lib/delivery-rates";
 
 export default function Checkout() {
   const router = useRouter();
@@ -13,15 +14,42 @@ export default function Checkout() {
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [shippingAddress, setShippingAddress] = useState("");
+  const [selectedState, setSelectedState] = useState("");
+  const [deliveryType, setDeliveryType] = useState<"home" | "park" | "">("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  async function handleSubmit(e: React.FormEvent) {
+  const selectedRate = deliveryRates.find((r) => r.state === selectedState);
+
+  const deliveryFee = !selectedRate
+    ? 0
+    : selectedRate.type === "flat"
+    ? selectedRate.flatPrice || 0
+    : deliveryType === "home"
+    ? selectedRate.homePrice || 0
+    : deliveryType === "park"
+    ? selectedRate.parkPrice || 0
+    : 0;
+
+  const grandTotal = totalPrice + deliveryFee;
+
+
+    async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
 
     if (!customerName || !customerEmail || !shippingAddress) {
       setError("Name, email, and shipping address are required.");
+      return;
+    }
+
+    if (!selectedState) {
+      setError("Please select a delivery state.");
+      return;
+    }
+
+    if (selectedRate?.type === "choice" && !deliveryType) {
+      setError("Please choose Home Delivery or Park Delivery.");
       return;
     }
 
@@ -35,7 +63,15 @@ export default function Checkout() {
     // Save customer details temporarily so the success page can use them
     sessionStorage.setItem(
       "fureve_checkout_customer",
-      JSON.stringify({ customerName, customerEmail, customerPhone, shippingAddress })
+      JSON.stringify({
+        customerName,
+        customerEmail,
+        customerPhone,
+        shippingAddress,
+        deliveryState: selectedState,
+        deliveryType: selectedRate?.type === "flat" ? "N/A" : deliveryType,
+        deliveryFee,
+      })
     );
 
     const res = await fetch("/api/checkout", {
@@ -43,14 +79,18 @@ export default function Checkout() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         email: customerEmail,
-        amount: totalPrice,
+        amount: grandTotal,
         metadata: {
           customerName,
           customerPhone,
           shippingAddress,
+          deliveryState: selectedState,
+          deliveryType: selectedRate?.type === "flat" ? "N/A" : deliveryType,
+          deliveryFee,
         },
       }),
     });
+
 
     const data = await res.json();
 
@@ -95,27 +135,84 @@ export default function Checkout() {
             Your Details
           </h1>
 
-          <div className="bg-cream border border-charcoal/10 p-6 mb-10">
+                    <div className="bg-cream border border-charcoal/10 p-6 mb-10">
             {items.map((item) => (
-                
-                <div
+              <div
                 key={item.cartItemId}
                 className="flex justify-between text-sm font-sans text-charcoal/80 py-2 border-b border-charcoal/10 last:border-0"
               >
-
                 <span>
                   {item.name} × {item.quantity}
                 </span>
                 <span>₦{(item.price * item.quantity).toFixed(2)}</span>
               </div>
             ))}
+            {selectedState && (
+              <div className="flex justify-between text-sm font-sans text-charcoal/80 py-2 border-b border-charcoal/10">
+                <span>Delivery ({selectedState})</span>
+                <span>₦{deliveryFee.toFixed(2)}</span>
+              </div>
+            )}
             <div className="flex justify-between font-serif text-lg text-charcoal pt-4">
               <span>Total</span>
-              <span>₦{totalPrice.toFixed(2)}</span>
+              <span>₦{grandTotal.toFixed(2)}</span>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+            <div>
+              <label className="block font-sans text-xs tracking-widest text-charcoal/70 uppercase mb-2">
+                Delivery State
+              </label>
+              <select
+                value={selectedState}
+                onChange={(e) => {
+                  setSelectedState(e.target.value);
+                  setDeliveryType("");
+                }}
+                className="w-full bg-transparent border border-charcoal/20 px-4 py-3 font-sans text-charcoal focus:outline-none focus:border-gold transition-colors"
+              >
+                <option value="">Select a state</option>
+                {deliveryRates.map((rate) => (
+                  <option key={rate.state} value={rate.state}>
+                    {rate.state}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {selectedRate?.type === "choice" && (
+              <div>
+                <label className="block font-sans text-xs tracking-widest text-charcoal/70 uppercase mb-2">
+                  Delivery Method
+                </label>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setDeliveryType("home")}
+                    className={`flex-1 px-4 py-3 border text-sm font-sans transition-colors ${
+                      deliveryType === "home"
+                        ? "border-gold bg-gold text-charcoal"
+                        : "border-charcoal/20 text-charcoal hover:border-charcoal"
+                    }`}
+                  >
+                    Home Delivery — ₦{selectedRate.homePrice}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDeliveryType("park")}
+                    className={`flex-1 px-4 py-3 border text-sm font-sans transition-colors ${
+                      deliveryType === "park"
+                        ? "border-gold bg-gold text-charcoal"
+                        : "border-charcoal/20 text-charcoal hover:border-charcoal"
+                    }`}
+                  >
+                    Park Delivery — ₦{selectedRate.parkPrice}
+                  </button>
+                </div>
+              </div>
+            )}
+
             <input
               type="text"
               placeholder="Full Name"

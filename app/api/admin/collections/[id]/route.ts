@@ -7,14 +7,15 @@ export async function PUT(
 ) {
   const { id } = await params;
   const body = await request.json();
-  const { name, description } = body;
+  const { name, description, type } = body;
 
   const { data, error } = await supabaseAdmin
     .from("collections")
-    .update({ name, description })
+    .update({ name, description, type })
     .eq("id", id)
     .select()
     .single();
+
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

@@ -54,6 +54,9 @@ export async function POST(request: Request) {
       })
       .join("");
 
+    const deliveryFee = customer.deliveryFee || 0;
+    const grandTotal = totalPrice + deliveryFee;
+
     await resend.emails.send({
       from: "Fureve Website <onboarding@resend.dev>",
       to: process.env.ADMIN_EMAIL!,
@@ -65,6 +68,10 @@ export async function POST(request: Request) {
         <p><strong>Email:</strong> ${customer.customerEmail}</p>
         ${customer.customerPhone ? `<p><strong>Phone:</strong> ${customer.customerPhone}</p>` : ""}
         ${customer.shippingAddress ? `<p><strong>Shipping Address:</strong> ${customer.shippingAddress}</p>` : ""}
+        <p style="background: #fdf6e3; padding: 10px; border-left: 4px solid #b8860b;">
+          <strong>Deliver To State:</strong> ${customer.deliveryState || "Not specified"}<br/>
+          ${customer.deliveryType && customer.deliveryType !== "N/A" ? `<strong>Delivery Method:</strong> ${customer.deliveryType === "home" ? "Home Delivery" : "Park Delivery"}` : ""}
+        </p>
         <p><strong>Payment Reference:</strong> ${reference}</p>
 
         <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
@@ -81,7 +88,8 @@ export async function POST(request: Request) {
           </tbody>
         </table>
 
-        <p style="margin-top: 20px; font-size: 18px;"><strong>Total: ₦${totalPrice.toFixed(2)}</strong></p>
+        <p style="margin-top: 12px;">Delivery Fee: ₦${deliveryFee.toFixed(2)}</p>
+        <p style="margin-top: 8px; font-size: 18px;"><strong>Total: ₦${grandTotal.toFixed(2)}</strong></p>
       `,
     });
 

@@ -11,9 +11,11 @@ export default function EditCollection() {
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [type, setType] = useState<"products" | "customizable">("products");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
 
   useEffect(() => {
     async function loadCollection() {
@@ -21,10 +23,12 @@ export default function EditCollection() {
       const data = await res.json();
       const collection = data.collections?.find((c: any) => c.id === id);
 
-      if (collection) {
+    if (collection) {
         setName(collection.name);
         setDescription(collection.description || "");
+        setType(collection.type || "products");
       }
+
       setLoading(false);
     }
     loadCollection();
@@ -41,11 +45,12 @@ export default function EditCollection() {
 
     setSaving(true);
 
-    const res = await fetch(`/api/admin/collections/${id}`, {
+const res = await fetch(`/api/admin/collections/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, description }),
+      body: JSON.stringify({ name, description, type }),
     });
+
 
     setSaving(false);
 
@@ -93,7 +98,7 @@ export default function EditCollection() {
             />
           </div>
 
-          <div>
+                    <div>
             <label className="block font-sans text-xs tracking-widest text-charcoal/70 uppercase mb-2">
               Description (optional)
             </label>
@@ -105,7 +110,42 @@ export default function EditCollection() {
             />
           </div>
 
+          <div>
+            <label className="block font-sans text-xs tracking-widest text-charcoal/70 uppercase mb-2">
+              Collection Type
+            </label>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setType("products")}
+                className={`flex-1 px-4 py-3 border text-sm font-sans transition-colors ${
+                  type === "products"
+                    ? "border-gold bg-gold text-charcoal"
+                    : "border-charcoal/20 text-charcoal hover:border-charcoal"
+                }`}
+              >
+                Products
+              </button>
+              <button
+                type="button"
+                onClick={() => setType("customizable")}
+                className={`flex-1 px-4 py-3 border text-sm font-sans transition-colors ${
+                  type === "customizable"
+                    ? "border-gold bg-gold text-charcoal"
+                    : "border-charcoal/20 text-charcoal hover:border-charcoal"
+                }`}
+              >
+                Customizable Items
+              </button>
+            </div>
+            <p className="font-sans text-xs text-charcoal/50 mt-2">
+              Changing this after items are already assigned may cause
+              mismatches — best to only change if the collection is empty.
+            </p>
+          </div>
+
           {error && <p className="font-sans text-sm text-red-600">{error}</p>}
+
 
           <button
             type="submit"

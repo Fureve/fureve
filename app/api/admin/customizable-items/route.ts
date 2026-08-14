@@ -24,7 +24,16 @@ export async function GET() {
 
 export async function POST(request: Request) {
   const body = await request.json();
-  const { name, description, starting_price, image_urls, sizes, lengths, colors } = body;
+  const {
+    name,
+    description,
+    starting_price,
+    image_urls,
+    size_options,
+    length_options,
+    color_options,
+    collection_id,
+  } = body;
 
   if (!name) {
     return NextResponse.json({ error: "Name is required" }, { status: 400 });
@@ -40,9 +49,10 @@ export async function POST(request: Request) {
         description,
         starting_price: starting_price || null,
         slug,
-        sizes: sizes && sizes.length > 0 ? sizes : null,
-        lengths: lengths && lengths.length > 0 ? lengths : null,
-        colors: colors && colors.length > 0 ? colors : null,
+        size_options: size_options && size_options.length > 0 ? size_options : null,
+        length_options: length_options && length_options.length > 0 ? length_options : null,
+        color_options: color_options && color_options.length > 0 ? color_options : null,
+        collection_id: collection_id || null,
       },
     ])
     .select()

@@ -24,7 +24,17 @@ export async function GET() {
 
 export async function POST(request: Request) {
   const body = await request.json();
-  const { name, category, price, collection_id, image_urls } = body;
+  const {
+    name,
+    category,
+    price,
+    collection_id,
+    image_urls,
+    description,
+    size_options,
+    length_options,
+    color_options,
+  } = body;
 
   if (!name || !category || !price) {
     return NextResponse.json(
@@ -37,9 +47,23 @@ export async function POST(request: Request) {
 
   const { data: product, error } = await supabaseAdmin
     .from("products")
-    .insert([{ name, category, price, collection_id: collection_id || null, slug }])
+    .insert([
+      {
+        name,
+        category,
+        price,
+        collection_id: collection_id || null,
+        slug,
+        description,
+        size_options: size_options && size_options.length > 0 ? size_options : null,
+        length_options: length_options && length_options.length > 0 ? length_options : null,
+        color_options: color_options && color_options.length > 0 ? color_options : null,
+      },
+    ])
     .select()
     .single();
+
+
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

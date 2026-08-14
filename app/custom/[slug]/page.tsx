@@ -12,16 +12,22 @@ type ItemImage = {
   sort_order: number;
 };
 
+type VariantOption = {
+  value: string;
+  priceAdjustment: number;
+};
+
 type Item = {
   id: string;
   name: string;
   description: string | null;
   starting_price: number | null;
   customizable_item_images: ItemImage[];
-  sizes: string[] | null;
-  lengths: string[] | null;
-  colors: string[] | null;
+  size_options: VariantOption[] | null;
+  length_options: VariantOption[] | null;
+  color_options: VariantOption[] | null;
 };
+
 
 
 export default function CustomItemPage() {
@@ -31,16 +37,22 @@ export default function CustomItemPage() {
   const [item, setItem] = useState<Item | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState<string | null>(null);
-
-   const { addItem } = useCart();
+  const { addItem } = useCart();
   const [details, setDetails] = useState("");
-  const [selectedSize, setSelectedSize] = useState("");
-  const [selectedLength, setSelectedLength] = useState("");
-  const [selectedColor, setSelectedColor] = useState("");
+  const [selectedSize, setSelectedSize] = useState<VariantOption | null>(null);
+  const [selectedLength, setSelectedLength] = useState<VariantOption | null>(null);
+  const [selectedColor, setSelectedColor] = useState<VariantOption | null>(null);
   const [added, setAdded] = useState(false);
   const [error, setError] = useState("");
 
   const DETAILS_LIMIT = 15;
+
+  const adjustedPrice =
+    (item?.starting_price || 0) +
+    (selectedSize?.priceAdjustment || 0) +
+    (selectedLength?.priceAdjustment || 0) +
+    (selectedColor?.priceAdjustment || 0);
+
 
 
   useEffect(() => {
@@ -66,31 +78,31 @@ export default function CustomItemPage() {
       function handleAddToCart() {
     setError("");
 
-    if (item?.sizes && item.sizes.length > 0 && !selectedSize) {
+    if (item?.size_options && item.size_options.length > 0 && !selectedSize) {
       setError("Please select a size.");
       return;
     }
-    if (item?.lengths && item.lengths.length > 0 && !selectedLength) {
+    if (item?.length_options && item.length_options.length > 0 && !selectedLength) {
       setError("Please select a length.");
       return;
     }
-    if (item?.colors && item.colors.length > 0 && !selectedColor) {
+    if (item?.color_options && item.color_options.length > 0 && !selectedColor) {
       setError("Please select a color.");
       return;
     }
 
     if (!item) return;
 
-    const variantParts = [selectedSize, selectedLength, selectedColor].filter(
-      Boolean
-    );
+    const variantParts = [selectedSize, selectedLength, selectedColor]
+      .filter((v): v is VariantOption => v !== null)
+      .map((v) => v.value);
     const variantText = variantParts.length > 0 ? ` [${variantParts.join(", ")}]` : "";
 
     addItem({
       productId: item.id,
       slug: `custom-${item.id}`,
       name: `${item.name} (Custom)`,
-      price: item.starting_price || 0,
+      price: adjustedPrice,
       image_url: images[0]?.image_url || null,
       quantity: 1,
       isCustom: true,
@@ -100,7 +112,6 @@ export default function CustomItemPage() {
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   }
-
 
   if (loading) {
     return (
@@ -183,11 +194,12 @@ export default function CustomItemPage() {
             <h1 className="font-serif text-3xl md:text-4xl text-charcoal mb-4">
               {item.name}
             </h1>
-               {item.starting_price && (
+                        {item.starting_price && (
               <p className="font-serif text-xl text-charcoal mb-4">
-                ₦{item.starting_price}
+                ₦{adjustedPrice.toFixed(2)}
               </p>
             )}
+
 
             {item.description && (
               <p className="font-sans text-base text-charcoal/70 leading-relaxed mb-8">
@@ -195,78 +207,77 @@ export default function CustomItemPage() {
               </p>
             )}
 
-                          <div className="flex flex-col gap-5">
-              {item.sizes && item.sizes.length > 0 && (
+               <div className="flex flex-col gap-5">
+              
+                            {item.size_options && item.size_options.length > 0 && (
                 <div>
                   <p className="font-sans text-xs tracking-widest text-charcoal/70 uppercase mb-2">
                     Size
                   </p>
                   <div className="flex flex-wrap gap-2">
-                  {item.sizes.map((size, index) => (
+                    {item.size_options.map((opt, index) => (
                       <button
-                        key={`${size}-${index}`}
-
-                        onClick={() => setSelectedSize(size)}
+                        key={`${opt.value}-${index}`}
+                        onClick={() => setSelectedSize(opt)}
                         className={`px-4 py-2 border text-sm font-sans transition-colors ${
-                          selectedSize === size
+                          selectedSize?.value === opt.value
                             ? "border-gold bg-gold text-charcoal"
                             : "border-charcoal/20 text-charcoal hover:border-charcoal"
                         }`}
                       >
-                        {size}
+                        {opt.value}
                       </button>
                     ))}
                   </div>
                 </div>
               )}
 
-              {item.lengths && item.lengths.length > 0 && (
+              {item.length_options && item.length_options.length > 0 && (
                 <div>
                   <p className="font-sans text-xs tracking-widest text-charcoal/70 uppercase mb-2">
                     Length
                   </p>
                   <div className="flex flex-wrap gap-2">
-                  {item.lengths.map((length, index) => (
+                    {item.length_options.map((opt, index) => (
                       <button
-                        key={`${length}-${index}`}
-
-                        onClick={() => setSelectedLength(length)}
+                        key={`${opt.value}-${index}`}
+                        onClick={() => setSelectedLength(opt)}
                         className={`px-4 py-2 border text-sm font-sans transition-colors ${
-                          selectedLength === length
+                          selectedLength?.value === opt.value
                             ? "border-gold bg-gold text-charcoal"
                             : "border-charcoal/20 text-charcoal hover:border-charcoal"
                         }`}
                       >
-                        {length}
+                        {opt.value}
                       </button>
                     ))}
                   </div>
                 </div>
               )}
 
-              {item.colors && item.colors.length > 0 && (
+              {item.color_options && item.color_options.length > 0 && (
                 <div>
                   <p className="font-sans text-xs tracking-widest text-charcoal/70 uppercase mb-2">
                     Color
                   </p>
                   <div className="flex flex-wrap gap-2">
-                  {item.colors.map((color, index) => (
+                    {item.color_options.map((opt, index) => (
                       <button
-                        key={`${color}-${index}`}
-
-                        onClick={() => setSelectedColor(color)}
+                        key={`${opt.value}-${index}`}
+                        onClick={() => setSelectedColor(opt)}
                         className={`px-4 py-2 border text-sm font-sans transition-colors ${
-                          selectedColor === color
+                          selectedColor?.value === opt.value
                             ? "border-gold bg-gold text-charcoal"
                             : "border-charcoal/20 text-charcoal hover:border-charcoal"
                         }`}
                       >
-                        {color}
+                        {opt.value}
                       </button>
                     ))}
                   </div>
                 </div>
               )}
+
 
               <div>
                 <p className="font-sans text-xs tracking-widest text-charcoal/70 uppercase mb-2">

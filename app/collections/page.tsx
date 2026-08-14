@@ -4,10 +4,12 @@ import { supabase } from "@/lib/supabase";
 export const revalidate = 0;
 
 export default async function Collections() {
-  const { data: collections } = await supabase
+    const { data: collections } = await supabase
     .from("collections")
     .select("*")
+    .eq("type", "products")
     .order("created_at", { ascending: false });
+
 
   const { data: uncategorized } = await supabase
     .from("products")

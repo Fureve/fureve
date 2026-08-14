@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import VariantOptionsEditor, { VariantOption } from "../../../components/VariantOptionsEditor";
 
 type Collection = {
   id: string;
@@ -14,10 +15,17 @@ export default function NewProduct() {
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [price, setPrice] = useState("");
+  const [description, setDescription] = useState("");
   const [collectionId, setCollectionId] = useState("");
   const [collections, setCollections] = useState<Collection[]>([]);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
+  const [hasSizes, setHasSizes] = useState(false);
+  const [sizeOptions, setSizeOptions] = useState<VariantOption[]>([]);
+  const [hasLengths, setHasLengths] = useState(false);
+  const [lengthOptions, setLengthOptions] = useState<VariantOption[]>([]);
+  const [hasColors, setHasColors] = useState(false);
+  const [colorOptions, setColorOptions] = useState<VariantOption[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -77,6 +85,10 @@ export default function NewProduct() {
         price: parseFloat(price),
         collection_id: collectionId || null,
         image_urls,
+        description,
+        size_options: hasSizes ? sizeOptions.filter((o) => o.value.trim()) : [],
+        length_options: hasLengths ? lengthOptions.filter((o) => o.value.trim()) : [],
+        color_options: hasColors ? colorOptions.filter((o) => o.value.trim()) : [],
       }),
     });
 
@@ -144,6 +156,18 @@ export default function NewProduct() {
 
           <div>
             <label className="block font-sans text-xs tracking-widest text-charcoal/70 uppercase mb-2">
+              Description (optional)
+            </label>
+            <textarea
+              rows={4}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full bg-transparent border border-charcoal/20 px-4 py-3 font-sans text-charcoal focus:outline-none focus:border-gold transition-colors resize-none"
+            />
+          </div>
+
+          <div>
+            <label className="block font-sans text-xs tracking-widest text-charcoal/70 uppercase mb-2">
               Collection (optional)
             </label>
             <select
@@ -160,10 +184,26 @@ export default function NewProduct() {
             </select>
           </div>
 
+          <VariantOptionsEditor
+            hasSizes={hasSizes}
+            setHasSizes={setHasSizes}
+            sizeOptions={sizeOptions}
+            setSizeOptions={setSizeOptions}
+            hasLengths={hasLengths}
+            setHasLengths={setHasLengths}
+            lengthOptions={lengthOptions}
+            setLengthOptions={setLengthOptions}
+            hasColors={hasColors}
+            setHasColors={setHasColors}
+            colorOptions={colorOptions}
+            setColorOptions={setColorOptions}
+          />
+
           <div>
             <label className="block font-sans text-xs tracking-widest text-charcoal/70 uppercase mb-2">
               Product Images
             </label>
+
             <input
               type="file"
               accept="image/jpeg,image/png,image/webp"

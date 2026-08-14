@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
+import VariantOptionsEditor, { VariantOption } from "../../../components/VariantOptionsEditor";
 
 type Collection = {
   id: string;
@@ -19,16 +20,22 @@ export default function EditProduct() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
-
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [price, setPrice] = useState("");
+  const [description, setDescription] = useState("");
   const [collectionId, setCollectionId] = useState("");
   const [collections, setCollections] = useState<Collection[]>([]);
   const [existingImages, setExistingImages] = useState<ProductImage[]>([]);
   const [removedImageIds, setRemovedImageIds] = useState<string[]>([]);
   const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
   const [newPreviews, setNewPreviews] = useState<string[]>([]);
+  const [hasSizes, setHasSizes] = useState(false);
+  const [sizeOptions, setSizeOptions] = useState<VariantOption[]>([]);
+  const [hasLengths, setHasLengths] = useState(false);
+  const [lengthOptions, setLengthOptions] = useState<VariantOption[]>([]);
+  const [hasColors, setHasColors] = useState(false);
+  const [colorOptions, setColorOptions] = useState<VariantOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -48,12 +55,25 @@ export default function EditProduct() {
         setName(p.name);
         setCategory(p.category);
         setPrice(String(p.price));
+        setDescription(p.description || "");
         setCollectionId(p.collection_id || "");
         setExistingImages(
           (p.product_images || []).sort(
             (a: ProductImage, b: ProductImage) => a.sort_order - b.sort_order
           )
         );
+        if (p.size_options && p.size_options.length > 0) {
+          setHasSizes(true);
+          setSizeOptions(p.size_options);
+        }
+        if (p.length_options && p.length_options.length > 0) {
+          setHasLengths(true);
+          setLengthOptions(p.length_options);
+        }
+        if (p.color_options && p.color_options.length > 0) {
+          setHasColors(true);
+          setColorOptions(p.color_options);
+        }
       }
 
       setCollections(collectionsData.collections || []);
@@ -115,6 +135,10 @@ export default function EditProduct() {
         collection_id: collectionId || null,
         new_image_urls,
         removed_image_ids: removedImageIds,
+        description,
+        size_options: hasSizes ? sizeOptions.filter((o) => o.value.trim()) : [],
+        length_options: hasLengths ? lengthOptions.filter((o) => o.value.trim()) : [],
+        color_options: hasColors ? colorOptions.filter((o) => o.value.trim()) : [],
       }),
     });
 
@@ -178,7 +202,7 @@ export default function EditProduct() {
 
           <div>
             <label className="block font-sans text-xs tracking-widest text-charcoal/70 uppercase mb-2">
-              Price ($)
+              Price (₦)
             </label>
             <input
               type="number"
@@ -186,6 +210,18 @@ export default function EditProduct() {
               value={price}
               onChange={(e) => setPrice(e.target.value)}
               className="w-full bg-transparent border border-charcoal/20 px-4 py-3 font-sans text-charcoal focus:outline-none focus:border-gold transition-colors"
+            />
+          </div>
+
+          <div>
+            <label className="block font-sans text-xs tracking-widest text-charcoal/70 uppercase mb-2">
+              Description (optional)
+            </label>
+            <textarea
+              rows={4}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full bg-transparent border border-charcoal/20 px-4 py-3 font-sans text-charcoal focus:outline-none focus:border-gold transition-colors resize-none"
             />
           </div>
 
@@ -207,10 +243,26 @@ export default function EditProduct() {
             </select>
           </div>
 
+          <VariantOptionsEditor
+            hasSizes={hasSizes}
+            setHasSizes={setHasSizes}
+            sizeOptions={sizeOptions}
+            setSizeOptions={setSizeOptions}
+            hasLengths={hasLengths}
+            setHasLengths={setHasLengths}
+            lengthOptions={lengthOptions}
+            setLengthOptions={setLengthOptions}
+            hasColors={hasColors}
+            setHasColors={setHasColors}
+            colorOptions={colorOptions}
+            setColorOptions={setColorOptions}
+          />
+
           <div>
             <label className="block font-sans text-xs tracking-widest text-charcoal/70 uppercase mb-2">
               Current Images
             </label>
+
             {existingImages.length === 0 ? (
               <p className="font-sans text-sm text-charcoal/50 mb-2">
                 No images yet.

@@ -47,8 +47,7 @@ export default function About() {
                 Personal Consultation
               </h3>
               <p className="font-sans text-sm text-charcoal/70 leading-relaxed">
-                Every custom piece begins with a conversation about your
-                story, style, and vision.
+                FUREVE was founded on a belief; jewelry should be special to oneself. We work with fine and ethically sourced metals and other materials to create curated collections and fully bespoke pieces — each one designed in close collaboration with you, from start to finish.
               </p>
             </div>
           </div>

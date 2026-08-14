@@ -3,7 +3,7 @@ import { Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
 import Footer from "./components/Footer";
 import { CartProvider } from "@/lib/cart-context";
-
+import WhatsAppButton from "./components/WhatsAppButton";
 
 
 const playfair = Playfair_Display({
@@ -35,6 +35,7 @@ export default function RootLayout({
         <CartProvider>
           {children}
           <Footer />
+          <WhatsAppButton />
         </CartProvider>
       </body>
 
