@@ -32,8 +32,10 @@ export async function POST(request: Request) {
     size_options,
     length_options,
     color_options,
+    font_options,
     collection_id,
   } = body;
+
 
   if (!name) {
     return NextResponse.json({ error: "Name is required" }, { status: 400 });
@@ -52,7 +54,9 @@ export async function POST(request: Request) {
         size_options: size_options && size_options.length > 0 ? size_options : null,
         length_options: length_options && length_options.length > 0 ? length_options : null,
         color_options: color_options && color_options.length > 0 ? color_options : null,
+        font_options: font_options && font_options.length > 0 ? font_options : null,
         collection_id: collection_id || null,
+
       },
     ])
     .select()

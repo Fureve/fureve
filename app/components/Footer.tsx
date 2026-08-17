@@ -102,7 +102,7 @@ export default function Footer() {
       </div>
 
       <div className="max-w-7xl mx-auto border-t border-ivory/10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-3 font-sans text-xs text-ivory/50">
-        <p>© 2026 Fureve</p>
+        <p>© 2026 FUREVE</p>
         <p>Designed with intention.</p>
       </div>
     </footer>

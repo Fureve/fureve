@@ -86,7 +86,7 @@ export default function ShippingPolicy() {
                 <li>Complete delivery address</li>
               </ul>
               <p className="font-sans text-sm text-charcoal/70 leading-relaxed">
-                Fureve is not responsible for delays or failed deliveries
+                FUREVE is not responsible for delays or failed deliveries
                 caused by incorrect or incomplete information provided by
                 the customer.
               </p>
@@ -102,7 +102,7 @@ export default function ShippingPolicy() {
                 additional delivery charges may apply for another attempt.
               </p>
               <p className="font-sans text-sm text-charcoal/70 leading-relaxed">
-                If your package is returned to Fureve, the applicable
+                If your package is returned to FUREVE, the applicable
                 redelivery fee must be paid before it is dispatched again.
               </p>
             </div>

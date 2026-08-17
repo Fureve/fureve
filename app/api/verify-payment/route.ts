@@ -68,10 +68,19 @@ export async function POST(request: Request) {
         <p><strong>Email:</strong> ${customer.customerEmail}</p>
         ${customer.customerPhone ? `<p><strong>Phone:</strong> ${customer.customerPhone}</p>` : ""}
         ${customer.shippingAddress ? `<p><strong>Shipping Address:</strong> ${customer.shippingAddress}</p>` : ""}
-        <p style="background: #fdf6e3; padding: 10px; border-left: 4px solid #b8860b;">
+                <p style="background: #fdf6e3; padding: 10px; border-left: 4px solid #b8860b;">
           <strong>Deliver To State:</strong> ${customer.deliveryState || "Not specified"}<br/>
-          ${customer.deliveryType && customer.deliveryType !== "N/A" ? `<strong>Delivery Method:</strong> ${customer.deliveryType === "home" ? "Home Delivery" : "Park Delivery"}` : ""}
+          ${
+            customer.deliveryType && customer.deliveryType !== "N/A"
+              ? customer.deliveryType === "home"
+                ? "<strong>Delivery Method:</strong> Home Delivery"
+                : customer.deliveryType === "park"
+                ? "<strong>Delivery Method:</strong> Park Delivery"
+                : `<strong>Delivery Area:</strong> ${customer.deliveryType}`
+              : ""
+          }
         </p>
+
         <p><strong>Payment Reference:</strong> ${reference}</p>
 
         <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">

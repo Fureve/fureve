@@ -52,7 +52,7 @@ export default function Contact() {
             Contact
           </p>
           <h1 className="font-serif text-3xl md:text-5xl text-charcoal mb-6">
-            Connect With Fureve
+            Connect With FUREVE
           </h1>
           <p className="font-sans text-base text-charcoal/70 leading-relaxed">
             For product inquiries, custom orders, or general questions, feel

@@ -15,7 +15,7 @@ export default function ReturnsRefunds() {
           </h1>
 
           <p className="font-sans text-base text-charcoal/70 leading-relaxed mb-10">
-            At Fureve, we want you to love your purchase. Please read this
+            At FUREVE, we want you to love your purchase. Please read this
             policy before placing your order.
           </p>
 
@@ -70,7 +70,7 @@ export default function ReturnsRefunds() {
               <p className="font-sans text-sm text-charcoal/70 leading-relaxed mb-3">
                 Customised items are made specifically for you and cannot be
                 cancelled, returned, or refunded once production has started,
-                except where the item is defective or Fureve made an error.
+                except where the item is defective or FUREVE made an error.
               </p>
               <p className="font-sans text-sm text-charcoal/70 leading-relaxed">
                 Customers are responsible for providing accurate names,

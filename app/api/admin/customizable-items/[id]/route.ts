@@ -26,7 +26,7 @@ export async function PUT(
 ) {
   const { id } = await params;
   const body = await request.json();
-    const {
+     const {
     name,
     description,
     starting_price,
@@ -35,6 +35,7 @@ export async function PUT(
     size_options,
     length_options,
     color_options,
+    font_options,
     collection_id,
   } = body;
 
@@ -47,11 +48,13 @@ export async function PUT(
       size_options: size_options && size_options.length > 0 ? size_options : null,
       length_options: length_options && length_options.length > 0 ? length_options : null,
       color_options: color_options && color_options.length > 0 ? color_options : null,
+      font_options: font_options && font_options.length > 0 ? font_options : null,
       collection_id: collection_id || null,
     })
     .eq("id", id)
     .select()
     .single();
+
 
 
   if (error) {

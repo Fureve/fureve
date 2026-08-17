@@ -110,6 +110,10 @@ export default function VariantOptionsEditor({
   setHasColors,
   colorOptions,
   setColorOptions,
+  hasFonts,
+  setHasFonts,
+  fontOptions,
+  setFontOptions,
 }: {
   hasSizes: boolean;
   setHasSizes: (v: boolean) => void;
@@ -123,6 +127,10 @@ export default function VariantOptionsEditor({
   setHasColors: (v: boolean) => void;
   colorOptions: VariantOption[];
   setColorOptions: (v: VariantOption[]) => void;
+  hasFonts?: boolean;
+  setHasFonts?: (v: boolean) => void;
+  fontOptions?: VariantOption[];
+  setFontOptions?: (v: VariantOption[]) => void;
 }) {
   return (
     <div className="border border-charcoal/10 p-5 flex flex-col gap-6">
@@ -159,6 +167,17 @@ export default function VariantOptionsEditor({
         options={colorOptions}
         onChange={setColorOptions}
       />
+
+      {hasFonts !== undefined && setHasFonts && fontOptions && setFontOptions && (
+        <OptionGroup
+          label="This item offers different fonts for engraving"
+          placeholder="e.g. Script"
+          enabled={hasFonts}
+          onToggle={setHasFonts}
+          options={fontOptions}
+          onChange={setFontOptions}
+        />
+      )}
     </div>
   );
 }

@@ -26,7 +26,9 @@ type Item = {
   size_options: VariantOption[] | null;
   length_options: VariantOption[] | null;
   color_options: VariantOption[] | null;
+  font_options: VariantOption[] | null;
 };
+
 
 
 
@@ -42,6 +44,7 @@ export default function CustomItemPage() {
   const [selectedSize, setSelectedSize] = useState<VariantOption | null>(null);
   const [selectedLength, setSelectedLength] = useState<VariantOption | null>(null);
   const [selectedColor, setSelectedColor] = useState<VariantOption | null>(null);
+  const [selectedFont, setSelectedFont] = useState<VariantOption | null>(null);
   const [added, setAdded] = useState(false);
   const [error, setError] = useState("");
 
@@ -51,9 +54,8 @@ export default function CustomItemPage() {
     (item?.starting_price || 0) +
     (selectedSize?.priceAdjustment || 0) +
     (selectedLength?.priceAdjustment || 0) +
-    (selectedColor?.priceAdjustment || 0);
-
-
+    (selectedColor?.priceAdjustment || 0) +
+    (selectedFont?.priceAdjustment || 0);
 
   useEffect(() => {
     async function loadItem() {
@@ -90,10 +92,14 @@ export default function CustomItemPage() {
       setError("Please select a color.");
       return;
     }
+    if (item?.font_options && item.font_options.length > 0 && !selectedFont) {
+      setError("Please select a font.");
+      return;
+    }
 
     if (!item) return;
 
-    const variantParts = [selectedSize, selectedLength, selectedColor]
+    const variantParts = [selectedSize, selectedLength, selectedColor, selectedFont]
       .filter((v): v is VariantOption => v !== null)
       .map((v) => v.value);
     const variantText = variantParts.length > 0 ? ` [${variantParts.join(", ")}]` : "";
@@ -255,7 +261,7 @@ export default function CustomItemPage() {
                 </div>
               )}
 
-              {item.color_options && item.color_options.length > 0 && (
+                            {item.color_options && item.color_options.length > 0 && (
                 <div>
                   <p className="font-sans text-xs tracking-widest text-charcoal/70 uppercase mb-2">
                     Color
@@ -277,6 +283,30 @@ export default function CustomItemPage() {
                   </div>
                 </div>
               )}
+
+              {item.font_options && item.font_options.length > 0 && (
+                <div>
+                  <p className="font-sans text-xs tracking-widest text-charcoal/70 uppercase mb-2">
+                    Font
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {item.font_options.map((opt, index) => (
+                      <button
+                        key={`${opt.value}-${index}`}
+                        onClick={() => setSelectedFont(opt)}
+                        className={`px-4 py-2 border text-sm font-sans transition-colors ${
+                          selectedFont?.value === opt.value
+                            ? "border-gold bg-gold text-charcoal"
+                            : "border-charcoal/20 text-charcoal hover:border-charcoal"
+                        }`}
+                      >
+                        {opt.value}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
 
 
               <div>

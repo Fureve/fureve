@@ -16,15 +16,21 @@ export default function Checkout() {
   const [shippingAddress, setShippingAddress] = useState("");
   const [selectedState, setSelectedState] = useState("");
   const [deliveryType, setDeliveryType] = useState<"home" | "park" | "">("");
+  const [selectedZone, setSelectedZone] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
   const selectedRate = deliveryRates.find((r) => r.state === selectedState);
+  const selectedZoneData = selectedRate?.zones?.find((z) => z.name === selectedZone);
 
   const deliveryFee = !selectedRate
     ? 0
+    : selectedRate.type === "pickup"
+    ? 0
     : selectedRate.type === "flat"
     ? selectedRate.flatPrice || 0
+    : selectedRate.type === "zones"
+    ? selectedZoneData?.price || 0
     : deliveryType === "home"
     ? selectedRate.homePrice || 0
     : deliveryType === "park"
@@ -32,6 +38,7 @@ export default function Checkout() {
     : 0;
 
   const grandTotal = totalPrice + deliveryFee;
+
 
 
     async function handleSubmit(e: React.FormEvent) {
@@ -53,6 +60,12 @@ export default function Checkout() {
       return;
     }
 
+    if (selectedRate?.type === "zones" && !selectedZone) {
+      setError("Please select your delivery area.");
+      return;
+    }
+
+
     if (items.length === 0) {
       setError("Your cart is empty.");
       return;
@@ -61,6 +74,13 @@ export default function Checkout() {
     setSubmitting(true);
 
     // Save customer details temporarily so the success page can use them
+        const deliveryDetail =
+      selectedRate?.type === "zones"
+        ? selectedZone
+        : selectedRate?.type === "choice"
+        ? deliveryType
+        : "N/A";
+
     sessionStorage.setItem(
       "fureve_checkout_customer",
       JSON.stringify({
@@ -69,7 +89,7 @@ export default function Checkout() {
         customerPhone,
         shippingAddress,
         deliveryState: selectedState,
-        deliveryType: selectedRate?.type === "flat" ? "N/A" : deliveryType,
+        deliveryType: deliveryDetail,
         deliveryFee,
       })
     );
@@ -85,11 +105,12 @@ export default function Checkout() {
           customerPhone,
           shippingAddress,
           deliveryState: selectedState,
-          deliveryType: selectedRate?.type === "flat" ? "N/A" : deliveryType,
+          deliveryType: deliveryDetail,
           deliveryFee,
         },
       }),
     });
+
 
 
     const data = await res.json();
@@ -160,7 +181,7 @@ export default function Checkout() {
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-            <div>
+                        <div>
               <label className="block font-sans text-xs tracking-widest text-charcoal/70 uppercase mb-2">
                 Delivery State
               </label>
@@ -169,6 +190,7 @@ export default function Checkout() {
                 onChange={(e) => {
                   setSelectedState(e.target.value);
                   setDeliveryType("");
+                  setSelectedZone("");
                 }}
                 className="w-full bg-transparent border border-charcoal/20 px-4 py-3 font-sans text-charcoal focus:outline-none focus:border-gold transition-colors"
               >
@@ -181,7 +203,33 @@ export default function Checkout() {
               </select>
             </div>
 
+            {selectedRate?.type === "zones" && (
+              <div>
+                <label className="block font-sans text-xs tracking-widest text-charcoal/70 uppercase mb-2">
+                  Delivery Area
+                </label>
+                <select
+                  value={selectedZone}
+                  onChange={(e) => setSelectedZone(e.target.value)}
+                  className="w-full bg-transparent border border-charcoal/20 px-4 py-3 font-sans text-charcoal focus:outline-none focus:border-gold transition-colors"
+                >
+                  <option value="">Select your area</option>
+                  {selectedRate.zones?.map((zone) => (
+                    <option key={zone.name} value={zone.name}>
+                      {zone.name} — ₦{zone.price}
+                    </option>
+                  ))}
+                </select>
+                {selectedZoneData?.areas && (
+                  <p className="font-sans text-xs text-charcoal/50 mt-2">
+                    Includes: {selectedZoneData.areas}
+                  </p>
+                )}
+              </div>
+            )}
+
             {selectedRate?.type === "choice" && (
+
               <div>
                 <label className="block font-sans text-xs tracking-widest text-charcoal/70 uppercase mb-2">
                   Delivery Method

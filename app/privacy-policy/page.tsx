@@ -15,7 +15,7 @@ export default function PrivacyPolicy() {
           </h1>
 
           <p className="font-sans text-base text-charcoal/70 leading-relaxed mb-10">
-            Fureve Enterprises ("Fureve", "we", "us", or "our") respects your
+            FUREVE Enterprises ("FUREVE", "we", "us", or "our") respects your
             privacy and is committed to protecting the personal information
             you provide when you visit our website, place an order, contact
             us, or otherwise interact with our services. This Privacy Policy
@@ -53,7 +53,7 @@ export default function PrivacyPolicy() {
               <p className="font-sans text-sm text-charcoal/70 leading-relaxed">
                 We do not collect or store your card details. Payments are
                 processed securely by Paystack, our third-party payment
-                processor, and Fureve never sees or retains your card number
+                processor, and FUREVE never sees or retains your card number
                 or banking credentials.
               </p>
             </div>
@@ -89,13 +89,13 @@ export default function PrivacyPolicy() {
                 Your order and account-related information is stored
                 securely using Supabase, our database provider. Order
                 confirmations, contact form messages, and customisation
-                requests are sent to Fureve via Resend, our email service
+                requests are sent to FUREVE via Resend, our email service
                 provider, so that your order can be processed.
               </p>
               <p className="font-sans text-sm text-charcoal/70 leading-relaxed mb-3">
                 Payments are processed by Paystack. When you complete a
                 purchase, Paystack processes your payment details directly;
-                Fureve only receives confirmation that payment was
+                FUREVE only receives confirmation that payment was
                 successful, along with a payment reference.
               </p>
               <p className="font-sans text-sm text-charcoal/70 leading-relaxed">

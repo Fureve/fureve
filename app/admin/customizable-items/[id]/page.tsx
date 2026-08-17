@@ -35,6 +35,8 @@ export default function EditCustomizableItem() {
   const [lengthOptions, setLengthOptions] = useState<VariantOption[]>([]);
   const [hasColors, setHasColors] = useState(false);
   const [colorOptions, setColorOptions] = useState<VariantOption[]>([]);
+  const [hasFonts, setHasFonts] = useState(false);
+  const [fontOptions, setFontOptions] = useState<VariantOption[]>([]);
   const [collectionId, setCollectionId] = useState("");
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,6 +74,10 @@ export default function EditCustomizableItem() {
         if (item.color_options && item.color_options.length > 0) {
           setHasColors(true);
           setColorOptions(item.color_options);
+        }
+        if (item.font_options && item.font_options.length > 0) {
+          setHasFonts(true);
+          setFontOptions(item.font_options);
         }
         if (item.collection_id) {
           setCollectionId(item.collection_id);
@@ -143,6 +149,7 @@ export default function EditCustomizableItem() {
         size_options: hasSizes ? sizeOptions.filter((o) => o.value.trim()) : [],
         length_options: hasLengths ? lengthOptions.filter((o) => o.value.trim()) : [],
         color_options: hasColors ? colorOptions.filter((o) => o.value.trim()) : [],
+        font_options: hasFonts ? fontOptions.filter((o) => o.value.trim()) : [],
         collection_id: collectionId || null,
       }),
     });
@@ -293,7 +300,7 @@ export default function EditCustomizableItem() {
             </select>
           </div>
 
-          <VariantOptionsEditor
+            <VariantOptionsEditor
             hasSizes={hasSizes}
             setHasSizes={setHasSizes}
             sizeOptions={sizeOptions}
@@ -306,7 +313,12 @@ export default function EditCustomizableItem() {
             setHasColors={setHasColors}
             colorOptions={colorOptions}
             setColorOptions={setColorOptions}
+            hasFonts={hasFonts}
+            setHasFonts={setHasFonts}
+            fontOptions={fontOptions}
+            setFontOptions={setFontOptions}
           />
+
 
           {error && <p className="font-sans text-sm text-red-600">{error}</p>}
 

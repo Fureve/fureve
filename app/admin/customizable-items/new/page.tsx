@@ -24,6 +24,8 @@ export default function NewCustomizableItem() {
   const [lengthOptions, setLengthOptions] = useState<VariantOption[]>([]);
   const [hasColors, setHasColors] = useState(false);
   const [colorOptions, setColorOptions] = useState<VariantOption[]>([]);
+  const [hasFonts, setHasFonts] = useState(false);
+  const [fontOptions, setFontOptions] = useState<VariantOption[]>([]);
   const [collectionId, setCollectionId] = useState("");
   const [collections, setCollections] = useState<Collection[]>([]);
   const [saving, setSaving] = useState(false);
@@ -90,6 +92,7 @@ export default function NewCustomizableItem() {
         size_options: hasSizes ? sizeOptions.filter((o) => o.value.trim()) : [],
         length_options: hasLengths ? lengthOptions.filter((o) => o.value.trim()) : [],
         color_options: hasColors ? colorOptions.filter((o) => o.value.trim()) : [],
+        font_options: hasFonts ? fontOptions.filter((o) => o.value.trim()) : [],
         collection_id: collectionId || null,
       }),
     });
@@ -210,7 +213,7 @@ export default function NewCustomizableItem() {
             )}
           </div>
 
-          <VariantOptionsEditor
+                    <VariantOptionsEditor
             hasSizes={hasSizes}
             setHasSizes={setHasSizes}
             sizeOptions={sizeOptions}
@@ -223,7 +226,12 @@ export default function NewCustomizableItem() {
             setHasColors={setHasColors}
             colorOptions={colorOptions}
             setColorOptions={setColorOptions}
+            hasFonts={hasFonts}
+            setHasFonts={setHasFonts}
+            fontOptions={fontOptions}
+            setFontOptions={setFontOptions}
           />
+
 
           {error && <p className="font-sans text-sm text-red-600">{error}</p>}
 

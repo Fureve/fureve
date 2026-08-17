@@ -25,7 +25,7 @@ export default function Terms() {
                 1. Products
               </h2>
               <p className="font-sans text-sm text-charcoal/70 leading-relaxed mb-3">
-                Fureve sells jewelry, watches, and related accessories,
+                FUREVE sells jewelry, watches, and related accessories,
                 including customised pieces.
               </p>
               <p className="font-sans text-sm text-charcoal/70 leading-relaxed">
@@ -43,7 +43,7 @@ export default function Terms() {
                 An order is confirmed after successful payment.
               </p>
               <p className="font-sans text-sm text-charcoal/70 leading-relaxed mb-3">
-                Fureve reserves the right to cancel an order where an item is
+                FUREVE reserves the right to cancel an order where an item is
                 unavailable, there is an obvious pricing/listing error,
                 fraudulent activity is suspected, or circumstances beyond our
                 control prevent fulfilment.
@@ -126,7 +126,7 @@ export default function Terms() {
                 7. Contact
               </h2>
               <p className="font-sans text-sm text-charcoal/70 leading-relaxed">
-                For questions about these Terms, contact Fureve through the
+                For questions about these Terms, contact FUREVE through the
                 contact details provided on our website.
               </p>
             </div>
