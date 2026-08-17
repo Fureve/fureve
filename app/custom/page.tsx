@@ -29,7 +29,7 @@ export default async function Custom() {
         </h1>
         <p className="font-sans text-base text-charcoal/70 max-w-xl mx-auto mt-6 leading-relaxed">
           Browse pieces available for customization, choose your favorite,
-          and tell us exactly how you'd like it made yours.
+          and tell us exactly how you'd like it made.
         </p>
       </section>
 
