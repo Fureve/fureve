@@ -57,7 +57,7 @@ export const deliveryRates: DeliveryRate[] = [
       },
       {
         name: "Others (Area not listed)",
-        price: 5000,
+        price: 6000,
       },
     ],
   },
